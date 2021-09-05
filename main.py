@@ -1,7 +1,7 @@
-# import the opencv library
 import cv2
+import argparse
 
-def main():
+def main(args):
     # define a video capture object
     videoCapture = cv2.VideoCapture(0)
 
@@ -30,8 +30,9 @@ def main():
         if len(faces) > 1:
             multipleFacesDetectedCount += 1
 
-        if multipleFacesDetectedCount > 30:
+        if multipleFacesDetectedCount == args.frames:
             print("Multiple faces detected for a while!")
+            multipleFacesDetectedCount = 0
 
         # Draw rectangle around the faces
         for (x, y, w, h) in faces:
@@ -51,4 +52,6 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--frames', type=int, help='number of frames that satisfies a condition before sending slack message')
+    main(parser.parse_args())
