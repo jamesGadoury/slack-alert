@@ -10,8 +10,12 @@ class VideoCaptureWindow:
         cv2.namedWindow(self.name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(self.name, self.width, self.height)
 
-    def updateFrame(self, frame):
+    def update_frame(self, frame):
         cv2.imshow(self.name, frame)
+
+    def exit_event(self):
+      # the 'q' button is set as the quitting button
+      return cv2.waitKey(1) & 0xFF == ord('q')
 
     def destroy(self):
         cv2.destroyWindow(self.name)

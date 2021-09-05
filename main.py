@@ -5,43 +5,42 @@ from faceclassifier import FaceClassifier
 
 def main(args):
     # define a video capture object
-    videoCapture = cv2.VideoCapture(0)
+    video_capture = cv2.VideoCapture(0)
 
     window = VideoCaptureWindow()
 
-    faceClassifier = FaceClassifier()
+    face_classifier = FaceClassifier()
 
-    multipleFacesDetectedCount = 0
+    multiple_faces_detected_count = 0
 
     while(True):
         # Capture the video frame by frame
-        ret, frame = videoCapture.read()
+        ret, frame = video_capture.read()
 
         window.generate()
 
         # Detect faces
-        faces = faceClassifier.detect_faces(frame)
+        faces = face_classifier.detect_faces(frame)
 
         if len(faces) > 1:
-            multipleFacesDetectedCount += 1
+            multiple_faces_detected_count += 1
 
-        if multipleFacesDetectedCount == args.frames:
+        if multiple_faces_detected_count == args.frames:
             print("Multiple faces detected for a while!")
-            multipleFacesDetectedCount = 0
+            multiple_faces_detected_count = 0
 
         # Draw rectangle around the faces
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
         # Display the resulting frame
-        window.updateFrame(frame)
+        window.update_frame(frame)
 
-        # the 'q' button is set as the quitting button
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if window.exit_event():
             break
 
     # Release the video capture object
-    videoCapture.release()
+    video_capture.release()
 
     # Destroy the video capture window
     window.destroy()
