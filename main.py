@@ -1,30 +1,13 @@
 import cv2
 import argparse
-
-
-WINDOW_NAME = 'VideoCapture'
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-
-def generate_window():
-    cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT)
-
-class FaceClassifier:
-    def __init__(self):
-        # Load the cascade
-        self.faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-
-    def detect_faces(self, frame):
-        assert(len(frame.shape)==3)
-        # assuming frame is in BGR
-        # Convert into grayscale
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        return self.faceCascade.detectMultiScale(gray, 1.1, 4)
+from video import VideoCaptureWindow
+from faceclassifier import FaceClassifier
 
 def main(args):
     # define a video capture object
     videoCapture = cv2.VideoCapture(0)
+
+    window = VideoCaptureWindow()
 
     faceClassifier = FaceClassifier()
 
@@ -34,7 +17,7 @@ def main(args):
         # Capture the video frame by frame
         ret, frame = videoCapture.read()
 
-        generate_window()
+        window.generate()
 
         # Detect faces
         faces = faceClassifier.detect_faces(frame)
@@ -51,7 +34,7 @@ def main(args):
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
         # Display the resulting frame
-        cv2.imshow(WINDOW_NAME, frame)
+        window.updateFrame(frame)
 
         # the 'q' button is set as the quitting button
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -60,8 +43,8 @@ def main(args):
     # Release the video capture object
     videoCapture.release()
 
-    # Destroy all the windows
-    cv2.destroyAllWindows()
+    # Destroy the video capture window
+    window.destroy()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
