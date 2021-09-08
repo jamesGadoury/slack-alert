@@ -10,6 +10,10 @@ class ConditionalFrameEvaluator:
     def evaluate(self, frame):
         if self.condition_checker.check(frame):
             self.counter += 1
+        elif self.counter > 0:
+            # if the counter is non zero, but the condition hasn't been found
+            # in this frame, clear the counter
+            self.counter = 0
         if self.counter == self.threshold:
             self.counter = 0
             return True
