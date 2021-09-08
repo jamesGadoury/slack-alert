@@ -4,6 +4,7 @@ from video import VideoCaptureWindow
 from frameprocessing import ConditionalFrameEvaluator, MultipleFaceChecker, FrameDebugger
 from slackbot import SlackBot
 import os
+from datetime import datetime
 
 def get_user_id_and_token_from_env():
     try:
@@ -39,12 +40,17 @@ def main(args):
 
         window.generate()
 
-        if conditional_evaluator.evaluate(frame):
-            print("Condition threshold met in frame, sending slack alert")
-            slack_bot.send_user_alert()
-
         if debugger:
             debugger.debug(frame)
+
+        if conditional_evaluator.evaluate(frame):
+            print("Condition threshold met in frame, sending slack alert")
+            if args.with_image:
+                image_file_name = f'captured_image_{datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")}.jpg'
+                cv2.imwrite(image_file_name, frame)
+                slack_bot.send_user_alert_with_img(image_file_name) 
+            else:
+                slack_bot.send_user_alert()
 
         # Display the resulting frame
         window.update_frame(frame)
@@ -62,4 +68,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('frames', type=int, help='number of frames that satisfies a condition before sending slack message')
     parser.add_argument('--debug', action='store_true', help='flag turns on debug logic')
+    parser.add_argument('--with_image', action='store_true', help='sends captured image with alert through slack')
     main(parser.parse_args())
