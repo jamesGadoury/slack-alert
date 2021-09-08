@@ -39,6 +39,6 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--frames', type=int, help='number of frames that satisfies a condition before sending slack message')
+    parser.add_argument('frames', type=int, help='number of frames that satisfies a condition before sending slack message')
     parser.add_argument('--debug', action='store_true', help='flag turns on debug logic')
     main(parser.parse_args())
