@@ -2,6 +2,20 @@ import cv2
 import argparse
 from video import VideoCaptureWindow
 from frameprocessing import ConditionalFrameEvaluator, MultipleFaceChecker, FrameDebugger
+from slackbot import SlackBot
+import os
+
+def get_user_id_and_token_from_env():
+    try:
+        slack_user_id   = os.environ['SLACK_USER_ID']
+        slack_bot_token = os.environ['SLACK_BOT_TOKEN']
+        return (slack_user_id, slack_bot_token)
+
+    except KeyError as e:
+        print("Tried to initialize SlackBot, but a required environent variable wasn't set!")
+        print("Ensure you set environment variables: SLACK_BOT_TOKEN and SLACK_USER_ID!")
+        print("SlackBot ")
+        return (None, None)
 
 def main(args):
     # define a video capture object
@@ -13,6 +27,12 @@ def main(args):
 
     debugger = FrameDebugger() if args.debug else None
 
+    slack_user_id, slack_bot_token = get_user_id_and_token_from_env()
+    if not slack_user_id or not slack_bot_token:
+        return
+
+    slack_bot = SlackBot(slack_user_id, slack_bot_token, "Multiple faces detected!")
+
     while(True):
         # Capture the video frame by frame
         ret, frame = video_capture.read()
@@ -20,7 +40,8 @@ def main(args):
         window.generate()
 
         if conditional_evaluator.evaluate(frame):
-            print("Multiple faces detected for a while!")
+            print("Condition threshold met in frame, sending slack alert")
+            slack_bot.send_user_alert()
 
         if debugger:
             debugger.debug(frame)
