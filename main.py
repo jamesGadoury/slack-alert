@@ -30,7 +30,6 @@ def get_conditional_evaluator(args):
     else:
         return None
 
-
 def main(args):
     # define a video capture object
     video_capture = cv2.VideoCapture(0)
