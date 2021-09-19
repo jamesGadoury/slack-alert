@@ -1,7 +1,7 @@
 import cv2
 import argparse
 from video import VideoCaptureWindow
-from frameprocessing import ConditionalFrameEvaluator, MultipleFaceChecker, FrameDebugger
+from frameprocessing import ConditionalFrameEvaluator, NotYourFaceChecker, MultipleFaceChecker, FrameDebugger
 from slackbot import SlackBot
 import os
 from datetime import datetime
@@ -18,13 +18,28 @@ def get_user_id_and_token_from_env():
         print("SlackBot ")
         return (None, None)
 
+def get_conditional_evaluator(args):
+    if args.condition == 'not-my-face':
+        if not args.user_img_file:
+            print('Need --user_img_file argument for not-my-face condition')
+            return None
+        return ConditionalFrameEvaluator(NotYourFaceChecker(args.user_img_file), args.frames)
+    elif args.condition == 'multi-face':
+        return ConditionalFrameEvaluator(MultipleFaceChecker(), args.frames)
+    else:
+        return None
+
+
 def main(args):
     # define a video capture object
     video_capture = cv2.VideoCapture(0)
 
     window = VideoCaptureWindow()
 
-    conditional_evaluator = ConditionalFrameEvaluator(MultipleFaceChecker(), args.frames)
+    conditional_evaluator = get_conditional_evaluator(args)
+
+    if not conditional_evaluator:
+        return
 
     debugger = FrameDebugger() if args.debug else None
 
@@ -32,12 +47,12 @@ def main(args):
     if not slack_user_id or not slack_bot_token:
         return
 
-    slack_bot = SlackBot(slack_user_id, slack_bot_token, "Multiple faces detected!")
+    slack_bot = SlackBot(slack_user_id, slack_bot_token, conditional_evaluator.alert())
 
     while(True):
         # Capture the video frame by frame
         ret, frame = video_capture.read()
-
+        
         window.generate()
 
         if debugger:
@@ -66,7 +81,9 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('condition', choices=['not-my-face', 'multi-face'], help='the condition that is in each frame')
     parser.add_argument('frames', type=int, help='number of frames that satisfies a condition before sending slack message')
     parser.add_argument('--debug', action='store_true', help='flag turns on debug logic')
     parser.add_argument('--with_image', action='store_true', help='sends captured image with alert through slack')
+    parser.add_argument('--user_img_file', help='user image file used for classification')
     main(parser.parse_args())

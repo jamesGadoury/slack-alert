@@ -1,6 +1,5 @@
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
-import os
 
 class SlackBot:
 	def __init__(self, slack_user_id, slack_bot_token, alert_message):
