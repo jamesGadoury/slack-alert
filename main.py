@@ -5,6 +5,7 @@ from frameprocessing import ConditionalFrameEvaluator, NotYourFaceChecker, Multi
 from slackbot import SlackBot
 import os
 from datetime import datetime
+import time
 
 def get_user_id_and_token_from_env():
     try:
@@ -70,8 +71,18 @@ def main(args):
         # Display the resulting frame
         window.update_frame(frame)
 
-        if window.exit_event():
+        window_event = window.handle_button_event()
+        if window_event == VideoCaptureWindow.QUIT_BUTTON:
             break
+
+        if window_event == VideoCaptureWindow.PAUSE_BUTTON:
+            print('Video Capture paused!')
+            while True:
+                time.sleep(0.5)
+                if window.handle_button_event() == VideoCaptureWindow.PAUSE_BUTTON:
+                    print('Video Capture unpaused!')
+                    break
+
 
     # Release the video capture object
     video_capture.release()

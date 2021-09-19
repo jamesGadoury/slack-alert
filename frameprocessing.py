@@ -38,7 +38,7 @@ class MultipleFaceChecker:
 
 def reduce_frame(frame):
     # Resize frame of video to 1/4 size for faster face recognition processing
-    return cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+    return cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
 
 def convert_to_rgb(frame):
     # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
@@ -56,7 +56,6 @@ class NotYourFaceChecker:
         face_encodings = face_recognition.face_encodings(frame, face_locations)
         for face_encoding in face_encodings:
             matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
-
             if False in matches:
                 return True
 
